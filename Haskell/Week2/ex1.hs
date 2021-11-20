@@ -9,7 +9,7 @@ myproduct = foldr (*) 1
 
 insert :: Int -> [Int] -> [Int]
 insert x [] = [x]
-insert y (x:xs) = 
+insert y (x:xs) =
     if y <= x then
         (y:x:xs)
     else
@@ -26,8 +26,8 @@ data Move = Rock | Paper | Scissors
   deriving (Eq, Show)
 
 beat :: Move -> Move
-beat Scissors = Rock 
-beat Rock = Paper 
+beat Scissors = Rock
+beat Rock = Paper
 beat Paper = Scissors
 
 lose :: Move -> Move
@@ -39,7 +39,7 @@ data Result = Win | Lose | Draw
   deriving (Eq, Show)
 
 outcome :: Move -> Move -> Result
-outcome m1 m2 
+outcome m1 m2
     | beat m1 == m2 = Lose
     | lose m1 == m2 = Win
     | otherwise = Draw
@@ -48,12 +48,12 @@ outcome m1 m2
 -- ----------------------------------------------------------------------------
 
 factorial :: Integer -> Integer
-factorial n = 
+factorial n =
   if n < 0 then 1
   else product [1..n]
 
 myRepeat :: Int -> Int -> [Int]
-myRepeat n x = 
+myRepeat n x =
   if n < 0 then []
   else [x | _ <- [1..n]]
 
@@ -64,7 +64,7 @@ range :: Int -> Int -> [Int]
 range low high = [low..high]
 
 sumInts :: Int -> Int -> Int
-sumInts low high = sum (range low high) 
+sumInts low high = sum (range low high)
 
 removeMultiples :: Int -> [Int] -> [Int]
 removeMultiples n list = [x | x <- list , (x `mod` n) /= 0]
@@ -86,7 +86,7 @@ mySum [] = 0
 mySum (x:xs) = x + mySum xs
 
 myProduct :: [Integer] -> Integer
-myProduct = foldInts (*) 1 
+myProduct = foldInts (*) 1
 
 foldInts :: (Integer -> Integer -> Integer) -> Integer -> [Integer] -> Integer
 foldInts _ base [] = base
@@ -101,7 +101,7 @@ myFoldl fn base (x:xs) = myFoldl fn (fn base x) xs
 -- myFoldr (-) [1..4] = -2
 myFoldr :: (a -> b -> b) -> b -> [a] -> b
 myFoldr _ base [] = base
-myFoldr fn base (x:xs) = fn x (myFoldr fn base xs) 
+myFoldr fn base (x:xs) = fn x (myFoldr fn base xs)
 
 --doesnt work yet
 myDifl :: [Integer] -> Integer -> Integer
@@ -125,4 +125,20 @@ myMap :: (a -> b) -> [a] -> [b]
 myMap fn list = [fn x | x <- list]
 
 myMapF :: (a -> b) -> [a] -> [b]
-myMapF fn = foldr (\x y-> fn x : y) [] 
+myMapF fn = foldr (\x y-> fn x : y) []
+
+
+-- * Function Chaining
+-- ----------------------------------------------------------------------------
+
+applyAll :: [a -> a] -> a -> a
+applyAll xs = foldr (.) (\ x -> x) xs
+
+
+applyTimes :: Int -> (a -> a) -> a -> a
+applyTimes n f  = 
+  if n > 0 then f . applyTimes (n-1) f
+  else id
+
+applyMultipleFuncs :: a -> [a -> b] -> [b]
+applyMultipleFuncs x fs = foldr (\ f -> (:) (f x)) [] fs
