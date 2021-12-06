@@ -1,0 +1,6 @@
+
+kinds:
+--classifies-->
+type Class: only needed during compilation tocheck that program is correct
+--classifies-->
+values: only ones there at run time
