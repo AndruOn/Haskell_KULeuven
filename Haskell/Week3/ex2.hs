@@ -1,6 +1,7 @@
 
 import Data.Char
-import Data.List (delete)
+import Data.List (delete, partition)
+import Distribution.Simple.Utils (xargs)
 
 
 -- * Sequences
@@ -119,15 +120,15 @@ myAddressBook = MkAdrBook
 
 instance HTML AddressBook where
   toHtml (MkAdrBook contacts) = HtmlTag "addressbook" [] [toHtml contacts]
-    
+
 instance HTML Contact where
     toHtml (MkContact name emails) = HtmlTag "contact" [] [toHtml emails]
 
-         
+
 instance HTML Email where
   toHtml (MkEmail email Work) = HtmlTag "email" [MkAttr "type" "work"] [HtmlString email]
   toHtml (MkEmail email Private) = HtmlTag "email" [MkAttr "type" "private"] [HtmlString email]
-  
+
 
 
 printHtmlString :: HtmlElement -> IO ()
@@ -151,7 +152,7 @@ selectionSort :: Ord a => [a] -> [a]
 selectionSort [] = []
 selectionSort list = s : (selectionSort newlist)
   where s = minimum list
-        newlist = delete s list 
+        newlist = delete s list
 
 
 -- * Quicksort
@@ -161,12 +162,95 @@ selectionSort list = s : (selectionSort newlist)
 partitionFold :: (a -> Bool) -> [a] -> ([a],[a])
 partitionFold fn = foldr funct ([],[])
   where funct = \x (ys,zs)-> if fn x then (x:ys,zs) else (ys,x:zs)
-                                  
+
 partitionFilter :: (a -> Bool) -> [a] -> ([a],[a])
-partitionFilter fn l = (filter fn l, filter (not . fn) l) 
+partitionFilter fn l = (filter fn l, filter (not . fn) l)
 
 partitionLC :: (a -> Bool) -> [a] -> ([a],[a])
 partitionLC fn l = ( [n | n<-l, fn n], [n | n<-l, not $ fn n])
 
 quicksort :: Ord a => [a] -> [a]
-quicksort = error "Not implemented"
+quicksort [] = []
+quicksort (x:xs) = quicksort ys ++ [x] ++ quicksort zs
+    where (ys,zs) = partitionFold (<x) xs
+
+
+-- * Arithmetic Expressions
+-- ----------------------------------------------------------------------------
+
+data Exp = Const Int
+         | Add Exp Exp
+         | Sub Exp Exp
+         | Mul Exp Exp
+  deriving (Show, Eq)
+
+eval :: Exp -> Int
+eval (Const x) = x
+eval (Add e1 e2) = eval e1 + eval e2
+eval (Sub e1 e2) = eval e1 - eval e2
+eval (Mul e1 e2) = eval e1 * eval e2
+
+
+data Inst = IPush Int | IAdd | ISub | IMul
+  deriving (Show, Eq)
+
+type Prog  = [Inst]
+type Stack = [Int]
+
+runtimeError :: Stack
+runtimeError = error "Runtime error."
+
+execute :: Inst -> Stack -> Stack
+execute (IPush x) list = x:list
+execute IAdd (x:y:tail) = x+y : tail
+execute ISub (x:y:tail) = y-x : tail
+execute IMul (x:y:tail) = x*y : tail
+execute _ list = runtimeError
+
+--run [IAdd, ISub] [4,5,6]
+--run [IAdd, ISub, IPush 7, IMul] [4,5,6,8]
+run :: Prog -> Stack -> Stack
+run [] s = s
+run (command:coms) stack = run coms (execute command stack)
+
+--compile (Sub (Const 1) (Mul (Const 2) (Const 3))) 
+--      -> [IPush 1,IPush 2,IPush 3,IMul,ISub]
+-- 1
+compile :: Exp -> Prog
+compile (Const x) = [IPush x]
+compile (Add x y) = compile x ++ compile y ++ [IAdd]
+compile (Sub x y) = compile x ++ compile y ++ [ISub]
+compile (Mul x y) = compile x ++ compile y ++ [IMul]
+
+-- * Coin Change
+-- ----------------------------------------------------------------------------
+
+amountsEuro :: [Int]
+amountsEuro = [1, 2, 5, 10, 20, 50, 100, 200]
+
+changesEuro :: Int -> [[Int]]
+changesEuro = changes amountsEuro
+
+--changesEuro 2 -> [[1,1],[2]]
+--changesEuro 10 ->
+--[[1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,2],[1,1,1,1,1,1,2,2],[1,1,1,1,1,5],
+--[1,1,1,1,2,2,2],[1,1,1,2,5],[1,1,2,2,2,2],[1,2,2,5],[2,2,2,2,2],[5,5],[10]]
+changes :: [Int] -> Int -> [[Int]]
+changes (x:amountsEuro) tot = combine (replicate (tot `div` x) x) tot
+changes [] tot = []
+
+--[response] -> total -> responses
+combine :: [Int] -> Int -> [[Int]]
+combine (x:y:xs) tot = 
+    if sum (x+y:xs) == tot then (x+y:xs): combine (x:y:xs) tot
+    else [(x:y:xs)]
+
+
+amountsEuroRev :: [Int]
+amountsEuroRev = reverse amountsEuro
+
+changesEuroRev :: Int -> [[Int]]
+changesEuroRev = changes amountsEuroRev
+
+checkReverse :: Int -> Bool
+checkReverse i = length (changesEuro i) == length (changesEuroRev i)
