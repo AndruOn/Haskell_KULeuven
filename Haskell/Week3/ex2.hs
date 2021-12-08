@@ -236,14 +236,17 @@ changesEuro = changes amountsEuro
 --[[1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,2],[1,1,1,1,1,1,2,2],[1,1,1,1,1,5],
 --[1,1,1,1,2,2,2],[1,1,1,2,5],[1,1,2,2,2,2],[1,2,2,5],[2,2,2,2,2],[5,5],[10]]
 changes :: [Int] -> Int -> [[Int]]
-changes (x:amountsEuro) tot = combine (replicate (tot `div` x) x) tot
-changes [] tot = []
-
---[response] -> total -> responses
-combine :: [Int] -> Int -> [[Int]]
-combine (x:y:xs) tot = 
-    if sum (x+y:xs) == tot then (x+y:xs): combine (x:y:xs) tot
-    else [(x:y:xs)]
+changes [] _ = []
+changes list amount 
+  | amount < 0 = []
+  | amount < minimum list = [[]]
+  | otherwise =
+    [
+      x:xs |
+      x <- list,
+      xs <- changes (filter (>=x) list) (amount-x),
+      sum (x:xs) == amount
+    ]
 
 
 amountsEuroRev :: [Int]
