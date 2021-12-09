@@ -2,7 +2,7 @@
 --TURTLE EXAM EX
 
 --PART 1--
-data Turtle = Finished | Turn Double Turtle | Forward Double Turtle
+data Turtle = Finished | Turn Double Turtle | Step Double Turtle
     deriving Show
 
 data State = Current Point Double
@@ -14,11 +14,11 @@ turn :: Double -> Turtle
 turn alpha = Turn alpha Finished
 
 step :: Double -> Turtle
-step d = Forward d Finished
+step d = Step d Finished
 
 (>>>) :: Turtle -> Turtle -> Turtle
 Turn a t1 >>> t2 = Turn a (t1 >>> t2)
-Forward d t1 >>> t2 = Forward d (t1 >>> t2)
+Step d t1 >>> t2 = Step d (t1 >>> t2)
 (>>>) Finished t1 = t1
 (>>>) t1 Finished = t1
 
@@ -35,7 +35,7 @@ turtleToLine = go (Current (500.0,500.0) 0)
 go :: State -> Turtle -> [Line]
 go (Current (x,y) a) Finished = []
 go (Current (x,y) alpha) (Turn a t) = go (Current (x,y) (alpha+a)) t
-go (Current (x,y) a) (Forward d t) = ((x,y), newPoint) : go (Current newPoint a) t
+go (Current (x,y) a) (Step d t) = ((x,y), newPoint) : go (Current newPoint a) t
     where newPoint = newPos (x,y) a d
 
 
@@ -83,7 +83,7 @@ Fdone >-> t1 = t1
 
 concretize :: Double -> Fractal -> Turtle
 concretize d (Fturn a t1) = Turn a (concretize d t1)
-concretize d (Fstep t1) = Forward d (concretize d t1)
+concretize d (Fstep t1) = Step d (concretize d t1)
 concretize d Fdone = Finished
 
 --refine :: Fractal -> Fractal -> Fractal
