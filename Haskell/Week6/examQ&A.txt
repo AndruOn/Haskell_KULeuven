@@ -1,0 +1,32 @@
+--------- Exam
+10/20 haskell
+10/20 prolog
+7 exam example on toledo
+no hoogle 
+electronic documentation : only what is in esystant
+
+--------- Priorities
+f g 3 => (f g) 3
+f $ g 3 $ f 5 => f $ (g 3 $ (f 5))
+f . g . h $ 7 => (f . g . h) $ 7 
+
+---------- Check the type of functiun
+Prelude> minimum (1,100) -- Ici ca prend que le 1elem comme foldable 
+    100
+Prelude> :t minimum
+    minimum :: (Foldable t, Ord a) => t a -> a
+Prelude> :t (1,100)
+    (1,100) :: (Num a, Num b) => (a, b)
+Prelude> :k (,)
+    (,) :: * -> * -> *
+Prelude> :k (,) Char Int
+    (,) Char Int :: *
+Prelude> :k (,) Int  -- this is the right type of kind to be foldable
+    (,) Int :: * -> *
+
+--------- length of maybe gives 1 bc its a Maybe object
+Prelude> let d = lookup 1 [(1,"errrrr"),(2,"caca")]
+Prelude> length d
+    1
+Prelude> d
+    Just "errrrr"

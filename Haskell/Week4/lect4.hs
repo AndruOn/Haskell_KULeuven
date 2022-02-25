@@ -1,4 +1,5 @@
 import Control.Monad 
+
 --import System.Random 
 
 -- program that prints number 5
@@ -117,7 +118,7 @@ gameGuess :: IO ()
 gameGuess = 
     do
         putStr "Guess the number I am thinking of between 1 and 100!\n"
-        n <- randomRIO (1,100)
+        let n = 69 :: Int --n <- randomRIO (1,100)
         loopGuess n
         putStr "Great you won\n"   
 
@@ -125,7 +126,7 @@ loopGuess :: Int -> IO ()
 loopGuess n =
     do 
         putStrLn "What is your guess?"
-        guess <- readLn :: Int
+        guess <- readLn 
         case compare n guess of
             LT -> do
                     putStr "lower"
@@ -139,4 +140,35 @@ loopGuess n =
 
 
 
+-------REDO------------------------------------------------------------------
+-- 2.a Write a number guessing game.
+--     The user thinks of a number and the game guesses it
+--     in a number of attempts.
+--
+--      Main> game
+--      Think of a number between 1 and 100!
+--      Is it 50? higher
+--      Is it 75? lower
+--      Is it 62? lower
+--      Is it 56? yes
+--      Great, I won!
+game' :: IO ()
+game' = 
+    do
+        putStrLn "Think of a number between 1 and 100!"
+        loop 1 100
+        putStrLn "Great I won !"
 
+loop :: Int -> Int -> IO ()
+loop start end = 
+    do
+        let guess = div (start + end) 2 :: Int
+        putStr ("Is it " ++ show guess ++ "? ")
+        answer <- getLine
+        case answer of 
+            "higher" -> loop (guess + 1) end
+            "lower" -> loop start (guess - 1)
+            "yes" -> return ()
+            _ -> do
+                    putStrLn "ERROR input: type higher lower or yes"
+                    loop start end

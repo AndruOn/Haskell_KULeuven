@@ -100,7 +100,7 @@ data Name = MkName
                 String --first name
                 String --last name
 
-data Email = MkEmail String  TypeEmail
+data Email = MkEmail String TypeEmail
 data TypeEmail = Work | Private
 data Contact = MkContact Name [Email]
 
